@@ -1,2 +1,1 @@
-# Keep Android service entry points and protocol classes stable.
--keep class com.sophy.admin.** { *; }
+# Sophy Receiver intentionally uses only platform APIs.
