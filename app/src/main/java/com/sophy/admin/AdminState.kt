@@ -11,9 +11,15 @@ object AdminState {
     val packets = AtomicLong(0)
     val lastPacketAt = AtomicLong(0)
 
+    val videoBroadcasting = AtomicBoolean(false)
+    val videoFrames = AtomicLong(0)
+    val lastVideoFrameAt = AtomicLong(0)
+
     @Volatile var receiverName: String = "البحث عن الشاشة…"
     @Volatile var receiverHost: String = ""
     @Volatile var receiverPort: Int = 45678
     @Volatile var status: String = "جاهز"
     @Volatile var error: String = ""
+    @Volatile var videoStatus: String = "جاهز"
+    @Volatile var videoError: String = ""
 }

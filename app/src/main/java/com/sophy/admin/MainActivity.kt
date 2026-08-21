@@ -22,6 +22,9 @@ class MainActivity : Activity() {
     private lateinit var stats: TextView
     private lateinit var broadcastButton: Button
     private lateinit var autoSwitch: Switch
+    private lateinit var videoStatus: TextView
+    private lateinit var videoButton: Button
+    private lateinit var autoVideoSwitch: Switch
     private val requestCode = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +45,7 @@ class MainActivity : Activity() {
     }
 
     private fun requestPermissionsIfNeeded() {
-        val permissions = mutableListOf(Manifest.permission.RECORD_AUDIO)
+        val permissions = mutableListOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA)
         if (Build.VERSION.SDK_INT >= 33) permissions += Manifest.permission.POST_NOTIFICATIONS
         val missing = permissions.filter {
             checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED
@@ -58,6 +61,9 @@ class MainActivity : Activity() {
                 startAdminServiceIfAllowed()
             } else {
                 Toast.makeText(this, "يجب السماح بالميكروفون لإرسال الصوت", Toast.LENGTH_LONG).show()
+            }
+            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "يجب السماح بالكاميرا لبث الفيديو", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -130,6 +136,45 @@ class MainActivity : Activity() {
         }
         root.addView(autoSwitch, lp(LinearLayout.LayoutParams.MATCH_PARENT, -2))
 
+        val divider = TextView(this).apply {
+            text = "—"
+            gravity = Gravity.CENTER
+            setTextColor(android.graphics.Color.rgb(60, 80, 100))
+            setPadding(0, 24, 0, 8)
+        }
+        root.addView(divider, lp(LinearLayout.LayoutParams.MATCH_PARENT, -2))
+
+        videoStatus = TextView(this).apply {
+            textSize = 17f
+            gravity = Gravity.CENTER
+            setTextColor(android.graphics.Color.rgb(157, 176, 196))
+            setPadding(0, 0, 0, 12)
+        }
+        root.addView(videoStatus, lp(LinearLayout.LayoutParams.MATCH_PARENT, -2))
+
+        videoButton = Button(this).apply {
+            text = "بدء بث الكاميرا"
+            textSize = 19f
+            isAllCaps = false
+            setOnClickListener { toggleVideo() }
+        }
+        root.addView(videoButton, lp(LinearLayout.LayoutParams.MATCH_PARENT, 60))
+
+        autoVideoSwitch = Switch(this).apply {
+            text = "بث الكاميرا تلقائياً عند العثور على الشاشة"
+            textSize = 16f
+            setTextColor(android.graphics.Color.rgb(245, 250, 255))
+            isChecked = AutoVideoPrefs.enabled(this@MainActivity)
+            setOnCheckedChangeListener { _, checked ->
+                AutoVideoPrefs.setEnabled(this@MainActivity, checked)
+                if (checked) sendServiceAction(AdminService.ACTION_START_VIDEO)
+                if (!checked && AdminState.videoBroadcasting.get()) {
+                    sendServiceAction(AdminService.ACTION_STOP_VIDEO)
+                }
+            }
+        }
+        root.addView(autoVideoSwitch, lp(LinearLayout.LayoutParams.MATCH_PARENT, -2))
+
         stats = TextView(this).apply {
             textSize = 14f
             gravity = Gravity.CENTER
@@ -165,6 +210,21 @@ class MainActivity : Activity() {
         rootRefreshLater()
     }
 
+    private fun toggleVideo() {
+        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissionsIfNeeded()
+            return
+        }
+        if (AdminState.videoBroadcasting.get()) {
+            AutoVideoPrefs.setEnabled(this, false)
+            autoVideoSwitch.isChecked = false
+            sendServiceAction(AdminService.ACTION_STOP_VIDEO)
+        } else {
+            sendServiceAction(AdminService.ACTION_START_VIDEO)
+        }
+        rootRefreshLater()
+    }
+
     private fun sendServiceAction(action: String) {
         val intent = Intent(this, AdminService::class.java).setAction(action)
         try { startService(intent) } catch (t: Throwable) {
@@ -195,6 +255,18 @@ class MainActivity : Activity() {
             "${AdminState.receiverName}\n${AdminState.receiverHost}:${AdminState.receiverPort}"
         } else AdminState.status
         stats.text = "الحزم المرسلة: ${AdminState.packets.get()}\n${AdminState.error}"
+
+        if (::videoStatus.isInitialized) {
+            if (AdminState.videoBroadcasting.get()) {
+                videoStatus.text = "● بث الكاميرا يعمل"
+                videoStatus.setTextColor(android.graphics.Color.rgb(95, 230, 140))
+                videoButton.text = "إيقاف بث الكاميرا"
+            } else {
+                videoStatus.text = "● ${AdminState.videoStatus}"
+                videoStatus.setTextColor(android.graphics.Color.rgb(101, 216, 255))
+                videoButton.text = "بدء بث الكاميرا"
+            }
+        }
     }
 
     private fun rootRefreshLater() {
