@@ -1,0 +1,2 @@
+Sophy Admin - local-network audio sender
+No external cloud service is required for audio transport.
