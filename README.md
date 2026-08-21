@@ -36,3 +36,7 @@
 - الإصدار الحالي يستخدم PCM16 عمداً ليطابق Receiver الحالي ويجعل أول اختبار بسيطاً.
 - بعد نجاح الاختبار يمكن إضافة Opus، اقتران الجهاز، تشفير، كلمة تنبيه، وواجهة تحكم متقدمة بدون تغيير أساس الاكتشاف.
 - Android قد يوقف التسجيل إذا أوقف المستخدم التطبيق قسرياً من إعدادات النظام أو سحب صلاحية الميكروفون.
+
+## Build fix
+The Admin project uses `setContentView(root)` in `MainActivity`; do not pass width/height integers to Activity#setContentView.
+The UDP target port defaults to `45678` and is replaced by the discovered receiver port when NSD resolves the TV.
