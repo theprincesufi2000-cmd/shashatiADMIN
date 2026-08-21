@@ -92,7 +92,7 @@ class AdminService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                getString(R.string.notification_channel),
+                "Sophy Admin",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "Sophy Admin audio streaming"
@@ -105,7 +105,7 @@ class AdminService : Service() {
 
     private fun buildNotification(): Notification {
         val openIntent = PendingIntent.getActivity(
-            this, 0, Intent(this, MainActivity::class.java),
+            this, 0, packageManager.getLaunchIntentForPackage(packageName) ?: Intent(packageName),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val stopIntent = PendingIntent.getService(
@@ -114,7 +114,7 @@ class AdminService : Service() {
         )
         val builder = Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_btn_speak_now)
-            .setContentTitle(getString(R.string.notification_title))
+            .setContentTitle("Sophy Admin")
             .setContentText(notificationText())
             .setOngoing(true)
             .setCategory(Notification.CATEGORY_SERVICE)

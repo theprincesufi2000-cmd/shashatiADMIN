@@ -17,7 +17,7 @@ class AudioSender(
     private var record: AudioRecord? = null
     private var socket: DatagramSocket? = null
     @Volatile private var host: String = ""
-    @Volatile private var port: Int = Protocol.MAX_PACKET
+    @Volatile private var port: Int = 45678
     private var sequence = 0L
 
     fun setTarget(host: String, port: Int) {
@@ -40,7 +40,7 @@ class AudioSender(
 
     private fun captureLoop() {
         val minBuffer = AudioRecord.getMinBufferSize(
-            Protocol.SAMPLE_RATE,
+            AudioProtocol.SAMPLE_RATE,
             AudioFormat.CHANNEL_IN_MONO,
             AudioFormat.ENCODING_PCM_16BIT
         )
@@ -49,7 +49,7 @@ class AudioSender(
             return
         }
 
-        val frameBytes = Protocol.AUDIO_BYTES_PER_FRAME
+        val frameBytes = AudioProtocol.AUDIO_BYTES_PER_FRAME
         val bufferSize = maxOf(minBuffer, frameBytes * 8)
         val pcm = ByteArray(frameBytes)
 
@@ -66,7 +66,7 @@ class AudioSender(
                 .setAudioFormat(
                     AudioFormat.Builder()
                         .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                        .setSampleRate(Protocol.SAMPLE_RATE)
+                        .setSampleRate(AudioProtocol.SAMPLE_RATE)
                         .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
                         .build()
                 )
@@ -92,7 +92,7 @@ class AudioSender(
                 }
                 if (!running.get()) break
 
-                val packet = Protocol.audio(
+                val packet = AudioProtocol.audio(
                     sequence = sequence++, 
                     timestampUs = System.nanoTime() / 1_000L,
                     pcm = pcm,
