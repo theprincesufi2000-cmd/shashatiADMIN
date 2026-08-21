@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.sophy.receiver"
+    namespace = "com.sophy.admin"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.sophy.receiver"
+        applicationId = "com.sophy.admin"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
