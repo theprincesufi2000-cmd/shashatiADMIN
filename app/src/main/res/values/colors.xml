@@ -1,0 +1,9 @@
+<resources>
+    <color name="sophy_bg">#07111F</color>
+    <color name="sophy_card">#0D1D31</color>
+    <color name="sophy_accent">#65D8FF</color>
+    <color name="sophy_green">#5FE68C</color>
+    <color name="sophy_text">#F5FAFF</color>
+    <color name="sophy_muted">#9DB0C4</color>
+    <color name="sophy_red">#FF6B7A</color>
+</resources>

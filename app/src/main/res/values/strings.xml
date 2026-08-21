@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Sophy Admin</string>
+    <string name="notification_channel">Sophy Admin</string>
+    <string name="notification_title">Sophy Admin</string>
+    <string name="notification_text">بث الصوت إلى شاشة Sophy</string>
+</resources>
